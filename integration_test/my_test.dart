@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
@@ -18,26 +17,21 @@ void main() {
     final listFinder = find.byType(Scrollable);
     final itemFinder = find.byKey(const ValueKey('item_500_text'));
 
-    Timer.periodic(
-      Duration(milliseconds: 600),
-      (timer) {
-        final performance = web.window.performance;
-        final memory = performance.getProperty("memory".toJS) as JSObject;
-        final jsHeapSizeLimit = memory.getProperty("jsHeapSizeLimit".toJS);
-        final totalJSHeapSize = memory.getProperty("totalJSHeapSize".toJS);
-        final usedJSHeapSize = memory.getProperty("usedJSHeapSize".toJS);
-
-        print("jsHeapSizeLimit: $jsHeapSizeLimit");
-        print("totalJSHeapSize: $totalJSHeapSize");
-        print("usedJSHeapSize: $usedJSHeapSize");
-      },
-    );
-
     await tester.scrollUntilVisible(
       itemFinder,
       500,
       scrollable: listFinder,
     );
+
+    final performance = web.window.performance;
+    final memory = performance.getProperty("memory".toJS) as JSObject;
+    final jsHeapSizeLimit = memory.getProperty("jsHeapSizeLimit".toJS);
+    final totalJSHeapSize = memory.getProperty("totalJSHeapSize".toJS);
+    final usedJSHeapSize = memory.getProperty("usedJSHeapSize".toJS);
+
+    print("jsHeapSizeLimit: $jsHeapSizeLimit");
+    print("totalJSHeapSize: $totalJSHeapSize");
+    print("usedJSHeapSize: $usedJSHeapSize");
   });
 }
 
