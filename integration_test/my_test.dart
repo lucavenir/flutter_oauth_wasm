@@ -22,16 +22,8 @@ void main() {
       500,
       scrollable: listFinder,
     );
-
-    final performance = web.window.performance;
-    final memory = performance.getProperty("memory".toJS) as JSObject;
-    final jsHeapSizeLimit = memory.getProperty("jsHeapSizeLimit".toJS);
-    final totalJSHeapSize = memory.getProperty("totalJSHeapSize".toJS);
-    final usedJSHeapSize = memory.getProperty("usedJSHeapSize".toJS);
-
-    print("jsHeapSizeLimit: $jsHeapSizeLimit");
-    print("totalJSHeapSize: $totalJSHeapSize");
-    print("usedJSHeapSize: $usedJSHeapSize");
+    final result = await measureMemoryUsageInBytes();
+    print(result);
   });
 }
 
@@ -62,4 +54,68 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Estimates the memory usage of the DevTools web aplication, including all
+/// iFrames and workers.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory.
+Future<int?> measureMemoryUsageInBytes() async {
+  // Use of this API requires a secure context and cross origin isolation.
+  if (web.window.isSecureContext && web.window.crossOriginIsolated) {
+    final memory = await web.window.performance
+        .measureUserAgentSpecificMemory();
+    return memory?.bytes;
+  }
+  return null;
+}
+
+extension on web.Performance {
+  @JS('measureUserAgentSpecificMemory')
+  external JSPromise<_UserAgentSpecificMemory>
+  _measureUserAgentSpecificMemory();
+
+  Future<_UserAgentSpecificMemory>? measureUserAgentSpecificMemory() =>
+      has('measureUserAgentSpecificMemory')
+      ? _measureUserAgentSpecificMemory().toDart
+      : null;
+}
+
+@JS()
+extension type _UserAgentSpecificMemory._(JSObject _) implements JSObject {
+  external int get bytes;
+
+  external JSArray<_UserAgentSpecificMemoryBreakdownElement> get breakdown;
+}
+
+@JS()
+extension type _UserAgentSpecificMemoryBreakdownElement._(JSObject _)
+    implements JSObject {
+  external JSArray<_UserAgentSpecificMemoryBreakdownAttributionElement>
+  get attribution;
+
+  external int get bytes;
+
+  external JSArray<JSString> get types;
+}
+
+@JS()
+extension type _UserAgentSpecificMemoryBreakdownAttributionElement._(JSObject _)
+    implements JSObject {
+  external _UserAgentSpecificMemoryBreakdownAttributionContainerElement?
+  get container;
+
+  external String get scope;
+
+  external String get url;
+}
+
+@JS()
+extension type _UserAgentSpecificMemoryBreakdownAttributionContainerElement._(
+  JSObject _
+)
+    implements JSObject {
+  external String get id;
+
+  external String get url;
 }
