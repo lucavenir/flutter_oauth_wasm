@@ -23,7 +23,7 @@ void main() {
       scrollable: listFinder,
     );
     final result = await measureMemoryUsageInBytes();
-    print(result);
+    print("memory usage: $result bytes");
   });
 }
 
@@ -62,6 +62,10 @@ class MyApp extends StatelessWidget {
 /// See https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory.
 Future<int?> measureMemoryUsageInBytes() async {
   // Use of this API requires a secure context and cross origin isolation.
+  print(
+    'isSecureContext: ${web.window.isSecureContext}, '
+    'crossOriginIsolated: ${web.window.crossOriginIsolated}',
+  );
   if (web.window.isSecureContext && web.window.crossOriginIsolated) {
     final memory = await web.window.performance
         .measureUserAgentSpecificMemory();
