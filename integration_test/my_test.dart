@@ -23,7 +23,13 @@ void main() {
       scrollable: listFinder,
     );
     final result = await measureMemoryUsageInBytes();
-    print("memory usage: $result bytes");
+    if (result == null) {
+      print("memory measurement not supported");
+      return;
+    }
+    print(
+      "memory usage: $result bytes, which is ${result ~/ (1024 * 1024)} MB",
+    );
   });
 }
 
@@ -69,6 +75,9 @@ Future<int?> measureMemoryUsageInBytes() async {
   if (web.window.isSecureContext && web.window.crossOriginIsolated) {
     final memory = await web.window.performance
         .measureUserAgentSpecificMemory();
+    if (memory == null) {
+      print("measureUserAgentSpecificMemory is not available)");
+    }
     return memory?.bytes;
   }
   return null;
